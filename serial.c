@@ -15,35 +15,27 @@
 #include "main.h"
 #include "serial.h"
 
+
+
 // ------------------------------------------------------------------------------------------------
 // Get serial speed
-speed_t get_serial_speed(uint32_t speed, uint32_t *speed_n)
 // ------------------------------------------------------------------------------------------------
-{
-    if (speed >= 460800)
-    {
+speed_t get_serial_speed(uint32_t speed, uint32_t *speed_n) {
+    if (speed >= 460800) {
         *speed_n = 460800;
-        return B460800;
-    }
-    else if (speed >= 230400)
-    {
+        return (B460800);
+    } else if (speed >= 230400) {
         *speed_n = 230400;
-        return B230400;
-    }
-    else if (speed >= 115200)
-    {
+        return (B230400);
+    } else if (speed >= 115200) {
         *speed_n = 115200;
-        return B115200;
-    }
-    else if (speed >= 57600)
-    {
+        return (B115200);
+    } else if (speed >= 57600) {
         *speed_n = 57600;
-        return B57600;
-    }
-    else if (speed >= 38400)
-    {
+        return (B57600);
+    } else if (speed >= 38400) {
         *speed_n = 38400;
-        return B38400;
+        return (B38400);
     }
     else if (speed >= 19200)
     {
@@ -84,24 +76,16 @@ speed_t get_serial_speed(uint32_t speed, uint32_t *speed_n)
     {
         *speed_n = 134;
         return B134;
-    }
-    else if (speed >= 110)
-    {
+    } else if (speed >= 110) {
         *speed_n = 110;
         return B110;
-    }
-    else if (speed >= 75)
-    {
+    } else if (speed >= 75) {
         *speed_n = 75;
         return B75;
-    }
-    else if (speed >= 50)
-    {
+    } else if (speed >= 50) {
         *speed_n = 50;
         return B50;
-    }
-    else
-    {
+    } else {
         *speed_n = 0;
         return B0;
     }
@@ -109,47 +93,44 @@ speed_t get_serial_speed(uint32_t speed, uint32_t *speed_n)
 
 // ------------------------------------------------------------------------------------------------
 // Init serial interface (TNC)
-void set_serial_parameters(serial_t *serial_parameters, arguments_t *arguments)
+void set_serial_parameters(serial_t *serial_parameters, arguments_t *arguments) {
 // ------------------------------------------------------------------------------------------------
-{
-    serial_parameters->SERIAL_TNC = open(arguments->serial_device, O_RDWR | O_NOCTTY | O_NONBLOCK);
+	serial_parameters->SERIAL_TNC = open(arguments->serial_device, (O_RDWR | O_NOCTTY | O_NONBLOCK));
 
-    memset (&serial_parameters->tty, 0, sizeof serial_parameters->tty);
+	memset(&serial_parameters->tty, 0, sizeof(serial_parameters->tty));
 
-    // Error Handling 
-    if ( tcgetattr (serial_parameters->SERIAL_TNC, &serial_parameters->tty ) != 0 ) 
-    {
-        printf("Error %d from tcgetattr: %s\n", errno, strerror(errno));
-    }
+	// Error Handling
+	if (tcgetattr(serial_parameters->SERIAL_TNC, &serial_parameters->tty) != 0) {
+		printf("Error %d from tcgetattr: %s\n", errno, strerror(errno));
+	}
 
-    // Save old tty parameters 
-    serial_parameters->tty_old = serial_parameters->tty;
+	// Save old tty parameters
+	serial_parameters->tty_old = serial_parameters->tty;
 
-    // Set Baud Rate 
-    cfsetospeed (&serial_parameters->tty, arguments->serial_speed);
-    cfsetispeed (&serial_parameters->tty, arguments->serial_speed);
+	// Set Baud Rate
+	cfsetospeed(&serial_parameters->tty, arguments->serial_speed);
+	cfsetispeed(&serial_parameters->tty, arguments->serial_speed);
 
-    // Setting other Port Stuff 
-    serial_parameters->tty.c_cflag     &=  ~PARENB;            // Make 8n1
-    serial_parameters->tty.c_cflag     &=  ~CSTOPB;
-    serial_parameters->tty.c_cflag     &=  ~CSIZE;
-    serial_parameters->tty.c_cflag     |=  CS8;
+	// Setting other Port Stuff
+	serial_parameters->tty.c_cflag &= ~(PARENB);            // Make 8n1
+	serial_parameters->tty.c_cflag &= ~(CSTOPB);
+	serial_parameters->tty.c_cflag &= ~(CSIZE);
+	serial_parameters->tty.c_cflag |= CS8;
 
-    serial_parameters->tty.c_cflag     &=  ~CRTSCTS;           // no flow control
-    serial_parameters->tty.c_cc[VMIN]   =  1;                  // read doesn't block
-    serial_parameters->tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
-    serial_parameters->tty.c_cflag     |=  CREAD | CLOCAL;     // turn on READ & ignore ctrl lines
+	serial_parameters->tty.c_cflag &= ~(CRTSCTS);           // no flow control
+	serial_parameters->tty.c_cc[VMIN] = 1;                  // read doesn't block
+	serial_parameters->tty.c_cc[VTIME] = 5;                  // 0.5 seconds read timeout
+	serial_parameters->tty.c_cflag |= (CREAD | CLOCAL);     // turn on READ & ignore ctrl lines
 
-    // Make raw 
-    cfmakeraw(&serial_parameters->tty);
+	// Make raw
+	cfmakeraw(&serial_parameters->tty);
 
-    // Flush Port, then applies attributes 
-    tcflush(serial_parameters->SERIAL_TNC, TCIFLUSH );
+	// Flush Port, then applies attributes
+	tcflush(serial_parameters->SERIAL_TNC, TCIFLUSH);
 
-    if ( tcsetattr (serial_parameters->SERIAL_TNC, TCSANOW, &serial_parameters->tty ) != 0) 
-    {
-        printf("Error %d from tcsetattr: %s\n", errno, strerror(errno));
-    }    
+	if (tcsetattr(serial_parameters->SERIAL_TNC, TCSANOW, &serial_parameters->tty) != 0) {
+		printf("Error %d from tcsetattr: %s\n", errno, strerror(errno));
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -166,5 +147,5 @@ int read_serial(serial_t *serial_parameters, char *buf, int buflen)
 // ------------------------------------------------------------------------------------------------
 {
     return read(serial_parameters->SERIAL_TNC, buf, buflen);
-} 
+}
 

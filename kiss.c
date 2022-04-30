@@ -15,7 +15,7 @@
 #include "util.h"
 
 static uint32_t tnc_tx_keyup_delay; // Tx keyup delay in microseconds
-static float    kiss_persistence;   // Persistence parameter
+static float kiss_persistence;   // Persistence parameter
 static uint32_t kiss_slot_time;     // Slot time in microseconds
 static uint32_t kiss_tx_tail;       // Tx tail in microseconds (obsolete)
 
@@ -29,54 +29,45 @@ static uint8_t kiss_command(uint8_t *block);
 // ------------------------------------------------------------------------------------------------
 // Utility to unconcatenate KISS blocks. Returns pointer on next KISS delimiter past first byte (KISS_FEND = 0xC0)
 // Assumes the pointer is currently on the opening KISS_FEND. Give pointer to first byte of block and past end pointer
-uint8_t *kiss_tok(uint8_t *block, uint8_t *end) 
 // ------------------------------------------------------------------------------------------------
-{
-    uint8_t *p_cur, *p_ret = NULL;
+uint8_t *kiss_tok(uint8_t *block, uint8_t *end) {
+	uint8_t *p_cur;
+	uint8_t *p_ret = NULL;
 
+	for (p_cur = block; p_cur < end; p_cur++) {
+		if (p_cur == block) {
+			if (*p_cur == KISS_FEND) {
+				continue;
+			} else {
+				break; // will return NULL
+			}
+		}
 
-    for (p_cur = block; p_cur < end; p_cur++)
-    {
-        if (p_cur == block)
-        {
-            if (*p_cur == KISS_FEND)
-            {
-                continue;
-            }
-            else
-            {
-                break; // will return NULL
-            }
-        }
+		if (*p_cur == KISS_FEND) {
+			p_ret = p_cur;
+			break;
+		}
+	}
 
-        if (*p_cur == KISS_FEND)
-        {
-            p_ret = p_cur;
-            break;
-        }
-    }
-
-    return p_ret;
+	return (p_ret);
 }
 
 // === Public functions ===========================================================================
 
 // ------------------------------------------------------------------------------------------------
 // Initialize the common parameters to defaults
-void kiss_init(arguments_t *arguments)
 // ------------------------------------------------------------------------------------------------
-{
-    tnc_tx_keyup_delay = arguments->tnc_keyup_delay; // 50ms Tx keyup delay
-    kiss_persistence = 0.25;                          // 0.25 persistence parameter
-    kiss_slot_time = 100000;                          // 100ms slot time
-    kiss_tx_tail = 0;                                 // obsolete
+void kiss_init(arguments_t *arguments) {
+	tnc_tx_keyup_delay = arguments->tnc_keyup_delay; // 50ms Tx keyup delay
+	kiss_persistence = 0.25;                          // 0.25 persistence parameter
+	kiss_slot_time = 100000;                          // 100ms slot time
+	kiss_tx_tail = 0;                                 // obsolete
 }
 
 // ------------------------------------------------------------------------------------------------
 // Remove KISS signalling
-void kiss_pack(uint8_t *kiss_block, uint8_t *packed_block, size_t *size)
 // ------------------------------------------------------------------------------------------------
-{
+void kiss_pack(uint8_t *kiss_block, uint8_t *packed_block, size_t *size) {
     size_t  new_size = 0, i;
     uint8_t fesc = 0;
 
@@ -95,7 +86,7 @@ void kiss_pack(uint8_t *kiss_block, uint8_t *packed_block, size_t *size)
             }
             else if (kiss_block[i] == KISS_TFESC) // TFESC
             {
-                packed_block[new_size++] = KISS_FESC; // FESC    
+                packed_block[new_size++] = KISS_FESC; // FESC
             }
 
              fesc = 0;
@@ -140,7 +131,7 @@ void kiss_unpack(uint8_t *kiss_block, uint8_t *packed_block, size_t *size)
 }
 
 // ------------------------------------------------------------------------------------------------
-// Check if the KISS block is a command block and interpret the command 
+// Check if the KISS block is a command block and interpret the command
 // Returns 1 if this is a command block
 // Returns 0 it this is a data block
 uint8_t kiss_command(uint8_t *block)
@@ -189,19 +180,19 @@ void kiss_run(serial_t *serial_parms, spi_parms_t *spi_parms, arguments_t *argum
     uint32_t timeout_value;
     uint8_t  rx_buffer[bufsize], tx_buffer[bufsize];
     uint8_t  rtx_toggle; // 1:Tx, 0:Rx
-    uint8_t  rx_trigger; 
-    uint8_t  tx_trigger; 
+    uint8_t  rx_trigger;
+    uint8_t  tx_trigger;
     uint8_t  force_mode;
     int      rx_count, tx_count, byte_count, ret;
     uint64_t timestamp;
-    struct timeval tp;  
+    struct timeval tp;
 
     set_serial_parameters(serial_parms, arguments);
     init_radio_int(spi_parms, arguments);
     memset(rx_buffer, 0, bufsize);
     memset(tx_buffer, 0, bufsize);
     radio_flush_fifos(spi_parms);
-    
+
     verbprintf(1, "Starting...\n");
 
     force_mode = 1;
@@ -214,13 +205,13 @@ void kiss_run(serial_t *serial_parms, spi_parms_t *spi_parms, arguments_t *argum
     radio_turn_rx(spi_parms);            // Turn Rx on
 
     while(1)
-    {    
+    {
         byte_count = radio_receive_packet(spi_parms, arguments, &rx_buffer[rx_count]); // check if anything was received on radio link
 
         if (byte_count > 0)
         {
             rx_count += byte_count;  // Accumulate Rx
-            
+
             gettimeofday(&tp, NULL);
             timestamp = tp.tv_sec * 1000000ULL + tp.tv_usec;
             timeout_value = arguments->tnc_radio_window;
@@ -275,7 +266,7 @@ void kiss_run(serial_t *serial_parms, spi_parms_t *spi_parms, arguments_t *argum
             rx_trigger = 0;
         }
 
-        if ((tx_count > 0) && ((tx_trigger) || (force_mode))) // Send bytes received on serial to air 
+        if ((tx_count > 0) && ((tx_trigger) || (force_mode))) // Send bytes received on serial to air
         {
             if (!kiss_command(tx_buffer))
             {
@@ -297,7 +288,7 @@ void kiss_run(serial_t *serial_parms, spi_parms_t *spi_parms, arguments_t *argum
             }
 
             tx_count = 0;
-            tx_trigger = 0;            
+            tx_trigger = 0;
         }
 
         if (!force_mode)
@@ -307,7 +298,7 @@ void kiss_run(serial_t *serial_parms, spi_parms_t *spi_parms, arguments_t *argum
             if ((tp.tv_sec * 1000000ULL + tp.tv_usec) > timestamp + timeout_value)
             {
                 force_mode = 1;
-            }                        
+            }
         }
 
         radio_wait_a_bit(4);

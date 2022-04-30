@@ -1,7 +1,7 @@
-picc1101
-========
+# picc1101 #
 
-Connect Raspberry-Pi to CC1101 RF module and play with AX.25/KISS to transmit TCP/IP over the air.
+Connect a [Raspberry Pi][1] to a [TI][2a] [CC1101][2b] [RF module][2c] and utilize the Linux **AX.25/KISS** stack to
+transmit **TCP/IP** over the air.
 
 - [picc1101](#picc1101)
 - [Introduction](#introduction)
@@ -34,7 +34,9 @@ Connect Raspberry-Pi to CC1101 RF module and play with AX.25/KISS to transmit TC
   - [Multiple block handling](#multiple-block-handling)
   - [Mitigate AX.25/KISS spurious packet retransmissions](#mitigate-ax25kiss-spurious-packet-retransmissions)
 
-# Introduction
+
+## Introduction ##
+
 The aim of this program is to connect a RF module based on the Texas Instruments (Chipcon) chip CC1101 to a Raspberry-Pi host machine. The CC1101 chip is a OOK/2-FSK/4-FSK/MSK/GFSK low power (~10dBm) digital transceiver working in the 315, 433 and 868 MHz ISM bands. The 433 MHz band also happens to cover the 70cm Amateur Radio band and the major drive of this work is to use these modules as a modern better alternative to the legacy [Terminal Node Controllers](http://en.wikipedia.org/wiki/Terminal_node_controller) or TNCs working in 1200 baud FM AFSK or 9600 baud G3RUH true 2-FSK modulation at best. Using the Linux native AX.25 and KISS interface to the TNCs it is then possible to route TCP/IP traffic using these modules offering the possibility to connect to the Amateur Radio private IP network known as [Hamnet](http://hamnetdb.net/).
 
 Another opportunity is the direct transmission of a Transport Stream to carry low rate live video and this will be studied later.
@@ -47,13 +49,22 @@ The CC1101 chip is interfaced using a SPI bus that is implemented natively on th
 
 The CC1101 data sheet is available [here](www.ti.com/lit/ds/symlink/cc1101.pdf).
 
-# Disclaimer
-You are supposed to use the CC1101 modules and this software sensibly. Please check your local radio spectrum regulations. 
 
-For Amateur Radio use you should have a valid Amateur Radio licence with a callsign and transmit in the bands and conditions granted by your local regulations also please try to respect the IARU band plan. In most if not all countries you are not allowed to transmit encrypted data so please do not route SSL traffic like `https` or `ssh`. Use plain `http` or `telnet` instead.
+## Disclaimer ##
 
-# Installation and basic usage
-## Prerequisites
+You are supposed to use the CC1101 modules and this software sensibly. Please check your local radio spectrum
+regulations. 
+
+For Amateur Radio use, you should have a valid Amateur Radio licence with a callsign and transmit in the bands and
+conditions granted by your local regulations; also, please try to respect the IARU band plan. In most _(if not all)_
+countries, you _are not allowed to **transmit encrypted data**_, so please do not route encrypted traffic like **https**
+or **ssh** over the connection. Use plain **http** or **telnet** instead.
+
+
+## Installation and Basic Usage ##
+
+### Prerequisites ###
+
 This has been tested successfully on a Raspberry Pi version 1 B with kernel 3.12.36. Raspberry Pi version 2 with a 3.18 kernel does not work.
 
 For best performance you will need the DMA based SPI driver for BCM2708 found [here](https://github.com/notro/spi-bcm2708.git) After successful compilation you will obtain a kernel module that is to be stored as `/lib/modules/$(uname -r)/kernel/drivers/spi/spi-bcm2708.ko` 
@@ -62,38 +73,56 @@ You will have to download and install the WiringPi library found [here](http://w
 
 The process relies heavily on interrupts that must be served in a timely manner. You are advised to reduce the interrupts activity by removing USB connected devices as much as possible.
 
-## Obtain the code
+
+### Obtain the code ###
+
 Just clone this repository in a local folder of your choice on the Raspberry Pi
 
-## Compilation
+
+### Compilation ###
+
 You can compile on the Raspberry Pi v.1 as it doesn't take too much time even on the single core BCM2735. You are advised to activate the -O3 optimization:
-  - `CFLAGS=-O3 make`
+
+- `CFLAGS=-O3 make`
 
 The result is the `picc1101` executable in the same directory
 
-## Run test programs
+
+### Run test programs ###
+
 On the sending side:
-  - `sudo ./picc1101 -v1 -B 9600 -P 252 -R7 -M4 -W -l15 -t2 -n5`
+
+- `sudo ./picc1101 -v1 -B 9600 -P 252 -R7 -M4 -W -l15 -t2 -n5`
 
 On the receiving side:
-  - `sudo ./picc1101 -v1 -B 9600 -P 252 -R7 -M4 -W -l15 -t4 -n5`
 
-This will send 5 blocks of 252 bytes at 9600 Baud using GFSK modulation and receive them at the other end. The block will contain the default test phrase `Hello, World!`.
+- `sudo ./picc1101 -v1 -B 9600 -P 252 -R7 -M4 -W -l15 -t4 -n5`
 
-Note that you have to be super user to execute the program.
+This will send 5 blocks of 252 bytes at 9600 baud using GFSK modulation and receive them at the other end. The block
+will contain the default test phrase `Hello, World!`.
 
-## Process priority
-You may experience better behaviour (less timeouts) depending on the speed of the link when raising the prioriry of the process. Interrupts are already served with high priority (-56) with the WiringPi library. The main process may need a little boost as well though
+**NOTE:** You must be superuser to execute the program.
 
-### Specify a higher priority at startup
+
+### Process priority ###
+
+You may experience better behaviour (less timeouts) depending on the speed of the link when raising the prioriry of the process. Interrupts are already served with high priority (-56) with the WiringPi library. The main process may need a little boost as well though.
+
+
+#### Specify a higher priority at startup ####
+
 You can use the `nice` utility: `sudo nice -n -20 ./picc1101 options...` 
 This will set the priority to 0 and is the minimum you can obtain with the `nice` commmand. The lower the priority figure the higher the actual priority. 
 
-### Engage the "real time" priority
+
+#### Engage the "real time" priority ####
+
 You can use option -T of the program to get an even lower priority of -2 for a so called "real time" scheduling. This is not real time actually but will push the priority figure into the negative numbers. It has been implemented with the WiringPi piHiPri method and -2 is the practical lowest figure possible before entering into bad behaviour that might make a cold reboot necessary. Note that this is the same priority as the watchdog.
 
-## Program options
- <pre><code>
+
+### Program options ###
+
+```
   -B, --tnc-serial-speed=SERIAL_SPEED
                              TNC Serial speed in Bauds (default : 9600)
   -d, --spi-device=SPI_DEVICE   SPI device, (default : /dev/spidev0.0)
@@ -151,23 +180,29 @@ You can use option -T of the program to get an even lower priority of -2 for a s
   -?, --help                 Give this help list
       --usage                Give a short usage message
       --version              Print program version
-</code></pre>
+```
 
 Note: variable length blocks are not implemented yet.
 
-## Detailed options
-### Verbosity level (-v)
+
+### Detailed options ###
+
+#### Verbosity level (-v) ####
+
 It ranges from 0 to 4:
-  - 0: nothing at all
-  - 1: Errors and some warnings and one line summary for each block sent or received
-  - 2: Adds details on received blocks like RSSI and LQI
-  - 3: Adds details on interrupt calls
-  - 4: Adds full hex dump of sent and received blocks
+
+- 0: nothing at all
+- 1: Errors and some warnings and one line summary for each block sent or received
+- 2: Adds details on received blocks like RSSI and LQI
+- 3: Adds details on interrupt calls
+- 4: Adds full hex dump of sent and received blocks
 
 Be aware that printing out to console takes time and might cause problems when transfer speeds and interactivity increase.
 
-### Radio interface speeds (-R)
- <pre><code>
+
+#### Radio interface speeds (-R) ####
+
+```
 Value: Rate (Baud):
  0     50 (experimental)
  1     110 (experimental)
@@ -186,7 +221,8 @@ Value: Rate (Baud):
 14     115200
 15     250000
 16     500000 (300000 for 4-FSK)
-</code></pre>
+```
+
 
 ### Modulations (-M)
  <pre><code>
@@ -334,3 +370,8 @@ These delays can be entered on the command line with the following long options 
   - `--tnc-serial-window`: defaults to 40ms. 
   - `--tnc-radio-window`: defaults to 0 that is no delay. Once the packet is received it will be immediately transfered to the serial link. At 9600 Baud 2-FSK with 250 byte packets the transmission time is already 208ms.
   
+
+
+[1]:    <https://raspberrypi.org/>
+[2a]:   <https://ti.com/>
+[2b]:   <https://ti.com/product/CC1101>
