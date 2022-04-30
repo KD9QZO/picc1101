@@ -1,2 +1,21 @@
+#
+# .gitignore
+#
+
+## GENERIC BACKUP & TEMPORARY FILES ##
+
+*~
+*.bak
+*.old
+*.tmp
+
+
+## BUILD ARTIFACTS ##
+
 *.o
 picc1101
+
+
+## IDE User-Specific Files ##
+
+*.user
