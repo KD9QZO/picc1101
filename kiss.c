@@ -14,15 +14,21 @@
 #include "radio.h"
 #include "util.h"
 
+
+
 static uint32_t tnc_tx_keyup_delay; // Tx keyup delay in microseconds
 static float kiss_persistence;   // Persistence parameter
 static uint32_t kiss_slot_time;     // Slot time in microseconds
 static uint32_t kiss_tx_tail;       // Tx tail in microseconds (obsolete)
 
+
+
 // === Static functions declarations ==============================================================
 
 static uint8_t *kiss_tok(uint8_t *block, uint8_t *end);
 static uint8_t kiss_command(uint8_t *block);
+
+
 
 // === Static functions ===========================================================================
 
@@ -51,6 +57,8 @@ uint8_t *kiss_tok(uint8_t *block, uint8_t *end) {
 
 	return (p_ret);
 }
+
+
 
 // === Public functions ===========================================================================
 
@@ -101,115 +109,115 @@ void kiss_pack(uint8_t *kiss_block, uint8_t *packed_block, size_t *size) {
 
 // ------------------------------------------------------------------------------------------------
 // Restore KISS signalling
-void kiss_unpack(uint8_t *kiss_block, uint8_t *packed_block, size_t *size)
 // ------------------------------------------------------------------------------------------------
-{
-    size_t  new_size = 0, i;
+void kiss_unpack(uint8_t *kiss_block, uint8_t *packed_block, size_t *size) {
+	size_t new_size = 0;
+	size_t i;
 
-    kiss_block[0] = KISS_FEND; // FEND
+	kiss_block[0] = KISS_FEND; // FEND
 
-    for (i=0; i<*size; i++)
-    {
-        if (packed_block[i] == KISS_FEND) // FEND
-        {
-            kiss_block[new_size++] = KISS_FESC; // FESC
-            kiss_block[new_size++] = KISS_TFEND; // TFEND
-        }
-        else if (packed_block[i] == KISS_FESC) // FESC
-        {
-            kiss_block[new_size++] = KISS_FESC; // FESC
-            kiss_block[new_size++] = KISS_TFESC; // TFESC
-        }
-        else
-        {
-            kiss_block[new_size++] = packed_block[i];
-        }
-    }
+	for (i = 0; i < *size; i++) {
+		if (packed_block[i] == KISS_FEND) {			// FEND
+			kiss_block[new_size++] = KISS_FESC;		// FESC
+			kiss_block[new_size++] = KISS_TFEND;	// TFEND
+		} else if (packed_block[i] == KISS_FESC) {	// FESC
+			kiss_block[new_size++] = KISS_FESC;		// FESC
+			kiss_block[new_size++] = KISS_TFESC;	// TFESC
+		} else {
+			kiss_block[new_size++] = packed_block[i];
+		}
+	}
 
-    kiss_block[new_size++] = KISS_FEND; // FEND
-    *size = new_size;
+	kiss_block[new_size++] = KISS_FEND;				// FEND
+	*size = new_size;
 }
 
 // ------------------------------------------------------------------------------------------------
 // Check if the KISS block is a command block and interpret the command
 // Returns 1 if this is a command block
 // Returns 0 it this is a data block
-uint8_t kiss_command(uint8_t *block)
 // ------------------------------------------------------------------------------------------------
-{
-    uint8_t command_code = block[1] & 0x0F;
-    uint8_t kiss_port = (block[1] & 0xF0)>>4;
-    uint8_t command_arg = block[2];
+uint8_t kiss_command(uint8_t *block) {
+	uint8_t command_code = (block[1] & 0x0F);
+	uint8_t kiss_port = ((block[1] & 0xF0) >> 4);
+	uint8_t command_arg = block[2];
 
-    verbprintf(4, "KISS: command %02X %02X\n", block[1], block[2]);
+	verbprintf(4, "KISS: command 0x%02X 0x%02X\n", block[1], block[2]);
 
-    switch (command_code)
-    {
-        case 0: // data block
-            return 0;
-        case 1: // TXDELAY
-            tnc_tx_keyup_delay = command_arg * 10000; // these are tenths of ms
-            break;
-        case 2: // Persistence parameter
-            kiss_persistence = (command_arg + 1) / 256.0;
-            break;
-        case 3: // Slot time
-            kiss_slot_time = command_arg * 10000; // these are tenths of ms
-            break;
-        case 4: // Tx tail
-            kiss_tx_tail = command_arg * 10000; // these are tenths of ms
-            break;
-        case 15:
-            verbprintf(1, "KISS: received aborting command\n");
-            abort();
-            break;
-        default:
-            break;
-    }
+	switch (command_code) {
+		case 0: // data block
+			return (0);
 
-    verbprintf(1, "KISS: command received for port %d: (%d,%d)\n", kiss_port, command_code, command_arg);
-    return 1;
+		case 1: // TXDELAY
+			tnc_tx_keyup_delay = command_arg * 10000; // these are tenths of ms
+			break;
+
+		case 2: // Persistence parameter
+			kiss_persistence = (command_arg + 1) / 256.0;
+			break;
+
+		case 3: // Slot time
+			kiss_slot_time = command_arg * 10000; // these are tenths of ms
+			break;
+
+		case 4: // Tx tail
+			kiss_tx_tail = command_arg * 10000; // these are tenths of ms
+			break;
+
+		case 15:
+			verbprintf(1, "KISS: received aborting command\n");
+			abort();
+			break;
+
+		default:
+			break;
+	}
+
+	verbprintf(1, "KISS: command received for port %d: (%d,%d)\n", kiss_port, command_code, command_arg);
+
+	return (1);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Run the KISS virtual TNC
-void kiss_run(serial_t *serial_parms, spi_parms_t *spi_parms, arguments_t *arguments)
 // ------------------------------------------------------------------------------------------------
-{
-    static const size_t   bufsize = RADIO_BUFSIZE;
-    uint32_t timeout_value;
-    uint8_t  rx_buffer[bufsize], tx_buffer[bufsize];
-    uint8_t  rtx_toggle; // 1:Tx, 0:Rx
-    uint8_t  rx_trigger;
-    uint8_t  tx_trigger;
-    uint8_t  force_mode;
-    int      rx_count, tx_count, byte_count, ret;
-    uint64_t timestamp;
-    struct timeval tp;
+void kiss_run(serial_t *serial_parms, spi_parms_t *spi_parms, arguments_t *arguments) {
+	static const size_t bufsize = RADIO_BUFSIZE;
+	uint32_t timeout_value;
+	uint8_t rx_buffer[bufsize];
+	uint8_t tx_buffer[bufsize];
+	uint8_t rtx_toggle; // 1:Tx, 0:Rx
+	uint8_t rx_trigger;
+	uint8_t tx_trigger;
+	uint8_t force_mode;
+	int rx_count;
+	int tx_count;
+	int byte_count;
+	int ret;
+	uint64_t timestamp;
+	struct timeval tp;
 
-    set_serial_parameters(serial_parms, arguments);
-    init_radio_int(spi_parms, arguments);
-    memset(rx_buffer, 0, bufsize);
-    memset(tx_buffer, 0, bufsize);
-    radio_flush_fifos(spi_parms);
+	set_serial_parameters(serial_parms, arguments);
+	init_radio_int(spi_parms, arguments);
+	memset(rx_buffer, 0, bufsize);
+	memset(tx_buffer, 0, bufsize);
+	radio_flush_fifos(spi_parms);
 
-    verbprintf(1, "Starting...\n");
+	verbprintf(1, "Starting...\n");
 
-    force_mode = 1;
-    rtx_toggle = 0;
-    rx_trigger = 0;
-    tx_trigger = 0;
-    rx_count = 0;
-    tx_count = 0;
-    radio_init_rx(spi_parms, arguments); // init for new packet to receive Rx
-    radio_turn_rx(spi_parms);            // Turn Rx on
+	force_mode = 1;
+	rtx_toggle = 0;
+	rx_trigger = 0;
+	tx_trigger = 0;
+	rx_count = 0;
+	tx_count = 0;
+	radio_init_rx(spi_parms, arguments); // init for new packet to receive Rx
+	radio_turn_rx(spi_parms);            // Turn Rx on
 
-    while(1)
-    {
-        byte_count = radio_receive_packet(spi_parms, arguments, &rx_buffer[rx_count]); // check if anything was received on radio link
+	while (1) {
+		byte_count = radio_receive_packet(spi_parms, arguments, &rx_buffer[rx_count]); // check if anything was received on radio link
 
-        if (byte_count > 0)
-        {
+		if (byte_count > 0) {
             rx_count += byte_count;  // Accumulate Rx
 
             gettimeofday(&tp, NULL);

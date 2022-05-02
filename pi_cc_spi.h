@@ -68,29 +68,29 @@
 
 
 typedef struct spi_parms_s {
-	uint8_t  mode;
-	uint8_t  bits;
+	uint8_t mode;
+	uint8_t bits;
 	uint32_t speed;
 	uint16_t delay;
-	int      fd;
-	int      ret;
-	struct   spi_ioc_transfer tr;
-	uint8_t  tx[65]; // max 1 command byte + 64 bytes FIFO
-	uint8_t  rx[65]; // max 1 status byte + 64 bytes FIFO
+	int fd;
+	int ret;
+	struct spi_ioc_transfer tr;
+	uint8_t tx[65];					// max 1 command byte + 64 bytes FIFO
+	uint8_t rx[65];					// max 1 status byte + 64 bytes FIFO
 } spi_parms_t;
 
 
 
 void PI_CC_SPIParmsDefaults(spi_parms_t *spi_parms);
 void PI_CC_Wait(unsigned int);
-int  PI_CC_SPISetup(spi_parms_t *spi_parms, arguments_t *arguments);
-int  PI_CC_SPIWriteReg(spi_parms_t *spi_parms, uint8_t addr, uint8_t byte);
-int  PI_CC_SPIWriteBurstReg(spi_parms_t *spi_parms, uint8_t addr, const uint8_t *bytes, uint8_t count);
-int  PI_CC_SPIReadReg(spi_parms_t *spi_parms, uint8_t addr, uint8_t *byte);
-int  PI_CC_SPIReadBurstReg(spi_parms_t *spi_parms, uint8_t addr, uint8_t **bytes, uint8_t count);
-int  PI_CC_SPIReadStatus(spi_parms_t *spi_parms, uint8_t addr, uint8_t *status);
-int  PI_CC_SPIStrobe(spi_parms_t *spi_parms, uint8_t strobe);
-int  PI_CC_PowerupResetCCxxxx(spi_parms_t *spi_parms);
+int PI_CC_SPISetup(spi_parms_t *spi_parms, arguments_t *arguments);
+int PI_CC_SPIWriteReg(spi_parms_t *spi_parms, uint8_t addr, uint8_t byte);
+int PI_CC_SPIWriteBurstReg(spi_parms_t *spi_parms, uint8_t addr, const uint8_t *bytes, uint8_t count);
+int PI_CC_SPIReadReg(spi_parms_t *spi_parms, uint8_t addr, uint8_t *byte);
+int PI_CC_SPIReadBurstReg(spi_parms_t *spi_parms, uint8_t addr, uint8_t **bytes, uint8_t count);
+int PI_CC_SPIReadStatus(spi_parms_t *spi_parms, uint8_t addr, uint8_t *status);
+int PI_CC_SPIStrobe(spi_parms_t *spi_parms, uint8_t strobe);
+int PI_CC_PowerupResetCCxxxx(spi_parms_t *spi_parms);
 
 
 #endif	/* !PI_CC_SPI_H_ */

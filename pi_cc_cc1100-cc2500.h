@@ -31,7 +31,7 @@
  * --/COPYRIGHT--*/
 //----------------------------------------------------------------------------
 //  Description:  This file contains definitions specific to the CC1100/2500.
-//  The configuration registers, strobe commands, and status registers are 
+//  The configuration registers, strobe commands, and status registers are
 //  defined, as well as some common masks for these registers.
 //
 //  MSP430/CC1100-2500 Interface Code Library v1.0
@@ -48,27 +48,27 @@
 //
 //----------------------------------------------------------------------------
 
-#ifndef _PI_CC_CC1100_CC2500_H_
-#define _PI_CC_CC1100_CC2500_H_
+#ifndef PI_CC_CC1100_CC2500_H_
+#define PI_CC_CC1100_CC2500_H_
 
 // Configuration Registers
-#define PI_CCxxx0_IOCFG2       0x00        // GDO2 output pin configuration
-#define PI_CCxxx0_IOCFG1       0x01        // GDO1 output pin configuration
-#define PI_CCxxx0_IOCFG0       0x02        // GDO0 output pin configuration
-#define PI_CCxxx0_FIFOTHR      0x03        // RX FIFO and TX FIFO thresholds
-#define PI_CCxxx0_SYNC1        0x04        // Sync word, high byte
-#define PI_CCxxx0_SYNC0        0x05        // Sync word, low byte
-#define PI_CCxxx0_PKTLEN       0x06        // Packet length
-#define PI_CCxxx0_PKTCTRL1     0x07        // Packet automation control
-#define PI_CCxxx0_PKTCTRL0     0x08        // Packet automation control
-#define PI_CCxxx0_ADDR         0x09        // Device address
-#define PI_CCxxx0_CHANNR       0x0A        // Channel number
-#define PI_CCxxx0_FSCTRL1      0x0B        // Frequency synthesizer control
-#define PI_CCxxx0_FSCTRL0      0x0C        // Frequency synthesizer control
-#define PI_CCxxx0_FREQ2        0x0D        // Frequency control word, high byte
-#define PI_CCxxx0_FREQ1        0x0E        // Frequency control word, middle byte
-#define PI_CCxxx0_FREQ0        0x0F        // Frequency control word, low byte
-#define PI_CCxxx0_MDMCFG4      0x10        // Modem configuration
+#define PI_CCxxx0_IOCFG2		0x00        // GDO2 output pin configuration
+#define PI_CCxxx0_IOCFG1		0x01        // GDO1 output pin configuration
+#define PI_CCxxx0_IOCFG0		0x02        // GDO0 output pin configuration
+#define PI_CCxxx0_FIFOTHR		0x03        // RX FIFO and TX FIFO thresholds
+#define PI_CCxxx0_SYNC1			0x04        // Sync word, high byte
+#define PI_CCxxx0_SYNC0			0x05        // Sync word, low byte
+#define PI_CCxxx0_PKTLEN		0x06        // Packet length
+#define PI_CCxxx0_PKTCTRL1		0x07        // Packet automation control
+#define PI_CCxxx0_PKTCTRL0		0x08        // Packet automation control
+#define PI_CCxxx0_ADDR			0x09        // Device address
+#define PI_CCxxx0_CHANNR		0x0A        // Channel number
+#define PI_CCxxx0_FSCTRL1		0x0B        // Frequency synthesizer control
+#define PI_CCxxx0_FSCTRL0		0x0C        // Frequency synthesizer control
+#define PI_CCxxx0_FREQ2			0x0D        // Frequency control word, high byte
+#define PI_CCxxx0_FREQ1			0x0E        // Frequency control word, middle byte
+#define PI_CCxxx0_FREQ0			0x0F        // Frequency control word, low byte
+#define PI_CCxxx0_MDMCFG4		0x10        // Modem configuration
 #define PI_CCxxx0_MDMCFG3      0x11        // Modem configuration
 #define PI_CCxxx0_MDMCFG2      0x12        // Modem configuration
 #define PI_CCxxx0_MDMCFG1      0x13        // Modem configuration
@@ -117,63 +117,65 @@
 #define PI_CCxxx0_SNOP         0x3D        // No operation.
 
 // Status registers
-#define PI_CCxxx0_PARTNUM      0x30        // Part number
-#define PI_CCxxx0_VERSION      0x31        // Current version number
-#define PI_CCxxx0_FREQEST      0x32        // Frequency offset estimate
-#define PI_CCxxx0_LQI          0x33        // Demodulator estimate for link quality
-#define PI_CCxxx0_RSSI         0x34        // Received signal strength indication
-#define PI_CCxxx0_MARCSTATE    0x35        // Control state machine state
-#define PI_CCxxx0_WORTIME1     0x36        // High byte of WOR timer
-#define PI_CCxxx0_WORTIME0     0x37        // Low byte of WOR timer
-#define PI_CCxxx0_PKTSTATUS    0x38        // Current GDOx status and packet status
-#define PI_CCxxx0_VCO_VC_DAC   0x39        // Current setting from PLL cal module
-#define PI_CCxxx0_TXBYTES      0x3A        // Underflow and # of bytes in TXFIFO
-#define PI_CCxxx0_RXBYTES      0x3B        // Overflow and # of bytes in RXFIFO
-#define PI_CCxxx0_NUM_RXBYTES  0x7F        // Mask "# of bytes" field in _RXBYTES
+#define PI_CCxxx0_PARTNUM		0x30        // Part number
+#define PI_CCxxx0_VERSION		0x31        // Current version number
+#define PI_CCxxx0_FREQEST		0x32        // Frequency offset estimate
+#define PI_CCxxx0_LQI			0x33        // Demodulator estimate for link quality
+#define PI_CCxxx0_RSSI			0x34        // Received signal strength indication
+#define PI_CCxxx0_MARCSTATE		0x35        // Control state machine state
+#define PI_CCxxx0_WORTIME1		0x36        // High byte of WOR timer
+#define PI_CCxxx0_WORTIME0		0x37        // Low byte of WOR timer
+#define PI_CCxxx0_PKTSTATUS		0x38        // Current GDOx status and packet status
+#define PI_CCxxx0_VCO_VC_DAC	0x39        // Current setting from PLL cal module
+#define PI_CCxxx0_TXBYTES		0x3A        // Underflow and # of bytes in TXFIFO
+#define PI_CCxxx0_RXBYTES		0x3B        // Overflow and # of bytes in RXFIFO
+#define PI_CCxxx0_NUM_RXBYTES	0x7F        // Mask "# of bytes" field in _RXBYTES
 
 // Other memory locations
-#define PI_CCxxx0_PATABLE      0x3E
-#define PI_CCxxx0_TXFIFO       0x3F
-#define PI_CCxxx0_RXFIFO       0x3F
+#define PI_CCxxx0_PATABLE		0x3E
+#define PI_CCxxx0_TXFIFO		0x3F
+#define PI_CCxxx0_RXFIFO		0x3F
 
 // Masks for appended status bytes
-#define PI_CCxxx0_LQI_RX       0x01        // Position of LQI byte
-#define PI_CCxxx0_CRC_OK       0x80        // Mask "CRC_OK" bit within LQI byte
+#define PI_CCxxx0_LQI_RX		0x01        // Position of LQI byte
+#define PI_CCxxx0_CRC_OK		0x80        // Mask "CRC_OK" bit within LQI byte
 
 // Definitions to support burst/single access:
-#define PI_CCxxx0_WRITE_BURST  0x40
-#define PI_CCxxx0_READ_SINGLE  0x80
-#define PI_CCxxx0_READ_BURST   0xC0
+#define PI_CCxxx0_WRITE_BURST	0x40
+#define PI_CCxxx0_READ_SINGLE	0x80
+#define PI_CCxxx0_READ_BURST	0xC0
 
 // Various constants
-#define PI_CCxxx0_FIFO_SIZE         64     // Rx or Tx FIFO size
-#define PI_CCxxx0_PACKET_COUNT_SIZE 255    // Packet bytes maximum count
+#define PI_CCxxx0_FIFO_SIZE			64     // Rx or Tx FIFO size
+#define PI_CCxxx0_PACKET_COUNT_SIZE	255    // Packet bytes maximum count
+
 
 // FSM states
 typedef enum ccxxx0_state_e {
-    CCxxx0_STATE_SLEEP = 0,
-    CCxxx0_STATE_IDLE,
-    CCxxx0_STATE_XOFF,
-    CCxxx0_STATE_VCOON_MC,
-    CCxxx0_STATE_REGON_MC,
-    CCxxx0_STATE_MANCAL,
-    CCxxx0_STATE_VCOON,
-    CCxxx0_STATE_REGON,
-    CCxxx0_STATE_STARTCAL,
-    CCxxx0_STATE_BWBOOST,
-    CCxxx0_STATE_FS_LOCK,
-    CCxxx0_STATE_IFADCON,
-    CCxxx0_STATE_ENDCAL,
-    CCxxx0_STATE_RX,
-    CCxxx0_STATE_RX_END,
-    CCxxx0_STATE_RX_RST,
-    CCxxx0_STATE_TXRX_SWITCH,
-    CCxxx0_STATE_RXFIFO_OVERFLOW,
-    CCxxx0_STATE_FSTXON,
-    CCxxx0_STATE_TX,
-    CCxxx0_STATE_TX_END,
-    CCxxx0_STATE_RXTX_SWITCH,
-    CCxxx0_STATE_TXFIFO_UNDERFLOW
+	CCxxx0_STATE_SLEEP = 0,
+	CCxxx0_STATE_IDLE,
+	CCxxx0_STATE_XOFF,
+	CCxxx0_STATE_VCOON_MC,
+	CCxxx0_STATE_REGON_MC,
+	CCxxx0_STATE_MANCAL,
+	CCxxx0_STATE_VCOON,
+	CCxxx0_STATE_REGON,
+	CCxxx0_STATE_STARTCAL,
+	CCxxx0_STATE_BWBOOST,
+	CCxxx0_STATE_FS_LOCK,
+	CCxxx0_STATE_IFADCON,
+	CCxxx0_STATE_ENDCAL,
+	CCxxx0_STATE_RX,
+	CCxxx0_STATE_RX_END,
+	CCxxx0_STATE_RX_RST,
+	CCxxx0_STATE_TXRX_SWITCH,
+	CCxxx0_STATE_RXFIFO_OVERFLOW,
+	CCxxx0_STATE_FSTXON,
+	CCxxx0_STATE_TX,
+	CCxxx0_STATE_TX_END,
+	CCxxx0_STATE_RXTX_SWITCH,
+	CCxxx0_STATE_TXFIFO_UNDERFLOW
 } ccxxx0_state_t;
 
-#endif
+
+#endif	/* !PI_CC_CC1100_CC2500_H_ */

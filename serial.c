@@ -36,9 +36,7 @@ speed_t get_serial_speed(uint32_t speed, uint32_t *speed_n) {
     } else if (speed >= 38400) {
         *speed_n = 38400;
         return (B38400);
-    }
-    else if (speed >= 19200)
-    {
+    } else if (speed >= 19200) {
         *speed_n = 19200;
         return B19200;
     }
@@ -138,7 +136,7 @@ void set_serial_parameters(serial_t *serial_parameters, arguments_t *arguments) 
 int write_serial(serial_t *serial_parameters, char *msg, int msglen)
 // ------------------------------------------------------------------------------------------------
 {
-    return write(serial_parameters->SERIAL_TNC, msg, msglen);
+	return write(serial_parameters->SERIAL_TNC, msg, msglen);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -146,6 +144,6 @@ int write_serial(serial_t *serial_parameters, char *msg, int msglen)
 int read_serial(serial_t *serial_parameters, char *buf, int buflen)
 // ------------------------------------------------------------------------------------------------
 {
-    return read(serial_parameters->SERIAL_TNC, buf, buflen);
+	return read(serial_parameters->SERIAL_TNC, buf, buflen);
 }
 

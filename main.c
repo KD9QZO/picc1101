@@ -75,7 +75,9 @@ uint8_t nb_preamble_bytes[] = {
 	24
 };
 
-/***** Argp configuration start *****/
+
+
+/* ===== Argp configuration start ===== */
 
 const char *argp_program_version = "PiCC1101 0.1";
 const char *argp_program_bug_address = "<f4exb06@gmail.com>";
@@ -115,8 +117,8 @@ static void delete_args(arguments_t *arguments);
 
 // ------------------------------------------------------------------------------------------------
 // Terminator
-static void terminate(const int signal_) {
 // ------------------------------------------------------------------------------------------------
+static void terminate(const int signal_) {
 	printf("PICC1101: Terminating with signal %d\n", signal_);
 	delete_args(&arguments);
 	exit(1);
@@ -124,6 +126,7 @@ static void terminate(const int signal_) {
 
 // ------------------------------------------------------------------------------------------------
 // Long help displays enumerated values
+// ------------------------------------------------------------------------------------------------
 static void print_long_help() {
 	int i;
 
@@ -263,213 +266,244 @@ static test_mode_t get_test_scheme(uint8_t test_mode_index) {
 
 // ------------------------------------------------------------------------------------------------
 // Get modulation scheme from index
-static modulation_t get_modulation_scheme(uint8_t modulation_index)
 // ------------------------------------------------------------------------------------------------
-{
-    if (modulation_index < NUM_MOD)
-    {
-        return (modulation_t) modulation_index;
-    }
-    else
-    {
-        return MOD_FSK2;
-    }
+static modulation_t get_modulation_scheme(uint8_t modulation_index) {
+	if (modulation_index < NUM_MOD) {
+		return ((modulation_t)modulation_index);
+	} else {
+		return (MOD_FSK2);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Get rate from index
-static rate_t get_rate(uint8_t rate_index)
 // ------------------------------------------------------------------------------------------------
-{
-    if (rate_index < NUM_RATE)
-    {
-        return (rate_t) rate_index;
-    }
-    else
-    {
-        return RATE_9600;
-    }
+static rate_t get_rate(uint8_t rate_index) {
+	if (rate_index < NUM_RATE) {
+		return ((rate_t)rate_index);
+	} else {
+		return (RATE_9600);
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
 // Option parser
-static error_t parse_opt (int key, char *arg, struct argp_state *state)
 // ------------------------------------------------------------------------------------------------
-{
-    arguments_t *arguments = state->input;
-    char        *end;  // Used to indicate if ASCII to int was successful
-    uint8_t     i8;
-    uint32_t    i32;
+static error_t parse_opt (int key, char *arg, struct argp_state *state) {
+	arguments_t *arguments = state->input;
+	char *end;												// Used to indicate if ASCII to int was successful
+	uint8_t i8;
+	uint32_t i32;
 
-    switch (key){
-        // Verbosity
-        case 'v':
-            arguments->verbose_level = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            else
-                verbose_level = arguments->verbose_level;
-            break;
-        // Print long help and exit
-        case 'H':
-            arguments->print_long_help = 1;
-            break;
-        // Activate FEC
-        case 'F':
-            arguments->fec = 1;
-            break;
-        // Activate whitening
-        case 'W':
-            arguments->whitening = 1;
-            break;
-        // Reception test
-        case 'r':
-            arguments->test_rx = 1;
-            break;
-        // Modulation scheme
-        case 'M':
-            i8 = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            else
-                arguments->modulation = get_modulation_scheme(i8);
-            break;
-        // Test scheme
-        case 't':
-            i8 = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            else
-                arguments->test_mode = get_test_scheme(i8);
-            break;
-        // Radio data rate
-        case 'R':
-            i8 = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            else
-                arguments->rate = get_rate(i8);
-            break;
-        // Radio link frequency
-        case 'f':
-            arguments->freq_hz = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        // Packet length
-        case 'P':
-            arguments->packet_length = strtol(arg, &end, 10) % 256;
-            if (*end)
-                argp_usage(state);
-            break;
-        // Packet delay
-        case 'l':
-            arguments->packet_delay = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        // Variable length packet
-        case 'V':
-            if (ALLOW_VAR_BLOCKS)
-            {
-                arguments->variable_length = 1;
-            }
-            else
-            {
-                fprintf(stderr, "Variable length blocks are not allowed (yet?)\n");
-            }
-            break;
-        // Real time scheduling
-        case 'T':
-            if (ALLOW_REAL_TIME)
-            {
-                arguments->real_time = 1;
-            }
-            else
-            {
-                fprintf(stderr, "Real time scheduling is not allowed\n");
-            }
-            break;
-        // Repetition factor
-        case 'n':
-            arguments->repetition = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        // Serial device
-        case 'D':
-            arguments->serial_device = strdup(arg);
-            break;
-        // Serial speed
-        case 'B':
-            i32 = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            else
-                arguments->serial_speed = get_serial_speed(i32, &(arguments->serial_speed_n));
-            break;
-        // SPI device
-        case 'd':
-            arguments->spi_device = strdup(arg);
-            break;
-        // Transmission test phrase
-        case 'y':
-            arguments->test_phrase = strdup(arg);
-            break;
-        // Print radio status and exit
-        case 's':
-            arguments->print_radio_status = 1;
-            break;
-        // Modulation index
-        case 'm':
-            arguments->modulation_index = atof(arg);
-            break;
-        // Rate skew multiplier
-        case 'w':
-            arguments->rate_skew = atof(arg);
-            break;
-        // KISS TNC serial link window
-        case 300:
-            arguments->tnc_serial_window = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        // KISS TNC radio link window
-        case 301:
-            arguments->tnc_radio_window = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        // KISS TNC keyup delay
-        case 302:
-            arguments->tnc_keyup_delay = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        // KISS TNC keydown delay
-        case 303:
-            arguments->tnc_keydown_delay = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        // KISS TNC switchover delay
-        case 304:
-            arguments->tnc_switchover_delay = strtol(arg, &end, 10);
-            if (*end)
-                argp_usage(state);
-            break;
-        default:
-            return ARGP_ERR_UNKNOWN;
-    }
+	switch (key) {
+		// Verbosity
+		case 'v':
+			arguments->verbose_level = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			} else {
+				verbose_level = arguments->verbose_level;
+			}
+			break;
 
-    return 0;
+		// Print long help and exit
+		case 'H':
+			arguments->print_long_help = 1;
+			break;
+
+		// Activate FEC
+		case 'F':
+			arguments->fec = 1;
+			break;
+
+		// Activate whitening
+		case 'W':
+			arguments->whitening = 1;
+			break;
+
+		// Reception test
+		case 'r':
+			arguments->test_rx = 1;
+			break;
+
+		// Modulation scheme
+		case 'M':
+			i8 = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			} else {
+				arguments->modulation = get_modulation_scheme(i8);
+			}
+			break;
+
+		// Test scheme
+		case 't':
+			i8 = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			} else {
+				arguments->test_mode = get_test_scheme(i8);
+			}
+			break;
+
+		// Radio data rate
+		case 'R':
+			i8 = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			} else {
+				arguments->rate = get_rate(i8);
+			}
+			break;
+
+		// Radio link frequency
+		case 'f':
+			arguments->freq_hz = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// Packet length
+		case 'P':
+			arguments->packet_length = strtol(arg, &end, 10) % 256;
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// Packet delay
+		case 'l':
+			arguments->packet_delay = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// Variable length packet
+		case 'V':
+			if (ALLOW_VAR_BLOCKS) {
+				arguments->variable_length = 1;
+			} else {
+				fprintf(stderr, "Variable length blocks are not allowed (yet?)\n");
+			}
+			break;
+
+		// Real time scheduling
+		case 'T':
+			if (ALLOW_REAL_TIME) {
+				arguments->real_time = 1;
+			} else {
+				fprintf(stderr, "Real time scheduling is not allowed\n");
+			}
+			break;
+
+		// Repetition factor
+		case 'n':
+			arguments->repetition = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// Serial device
+		case 'D':
+			arguments->serial_device = strdup(arg);
+			break;
+
+		// Serial speed
+		case 'B':
+			i32 = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			} else {
+				arguments->serial_speed = get_serial_speed(i32, &(arguments->serial_speed_n));
+			}
+			break;
+
+		// SPI device
+		case 'd':
+			arguments->spi_device = strdup(arg);
+			break;
+
+		// Transmission test phrase
+		case 'y':
+			arguments->test_phrase = strdup(arg);
+			break;
+
+		// Print radio status and exit
+		case 's':
+			arguments->print_radio_status = 1;
+			break;
+
+		// Modulation index
+		case 'm':
+			arguments->modulation_index = atof(arg);
+			break;
+
+		// Rate skew multiplier
+		case 'w':
+			arguments->rate_skew = atof(arg);
+			break;
+
+		// KISS TNC serial link window
+		case 300:
+			arguments->tnc_serial_window = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// KISS TNC radio link window
+		case 301:
+			arguments->tnc_radio_window = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// KISS TNC keyup delay
+		case 302:
+			arguments->tnc_keyup_delay = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// KISS TNC keydown delay
+		case 303:
+			arguments->tnc_keydown_delay = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		// KISS TNC switchover delay
+		case 304:
+			arguments->tnc_switchover_delay = strtol(arg, &end, 10);
+			if (*end) {
+				argp_usage(state);
+			}
+			break;
+
+		default:
+			return (ARGP_ERR_UNKNOWN);
+	}
+
+	return (0);
 }
 
 // ------------------------------------------------------------------------------------------------
-static struct argp argp = {options, parse_opt, args_doc, doc};
+static struct argp argp = {
+	options,
+	parse_opt,
+	args_doc,
+	doc
+};
 // ------------------------------------------------------------------------------------------------
 
-/***** ARGP configuration stop *****/
+
+/* ===== ARGP configuration stop ===== */
 
 // ------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
@@ -505,62 +539,45 @@ int main(int argc, char *argv[]) {
 		return (0);
 	}
 
-    if (!arguments.serial_device)
-    {
-        arguments.serial_device = strdup("/var/ax25/axp2");
-    }
-    if (!arguments.spi_device)
-    {
-        arguments.spi_device = strdup("/dev/spidev0.0");
-    }
+	if (!arguments.serial_device) {
+		arguments.serial_device = strdup("/var/ax25/axp2");
+	}
+	if (!arguments.spi_device) {
+		arguments.spi_device = strdup("/dev/spidev0.0");
+	}
 
-    print_args(&arguments);
+	print_args(&arguments);
 
-    init_radio_parms(&radio_parameters, &arguments);
-    ret = init_radio(&radio_parameters, &spi_parameters, &arguments);
+	init_radio_parms(&radio_parameters, &arguments);
+	ret = init_radio(&radio_parameters, &spi_parameters, &arguments);
 
-    if (ret != 0)
-    {
-        fprintf(stderr, "PICC: Cannot initialize radio link, RC=%d\n", ret);
-        delete_args(&arguments);
-        return ret;
-    }
+	if (ret != 0) {
+		fprintf(stderr, "PICC: Cannot initialize radio link, RC=%d\n", ret);
+		delete_args(&arguments);
+		return (ret);
+	}
 
-    if (arguments.print_radio_status)
-    {
-        fprintf(stderr, "\n--- Radio state ---\n");
-        print_radio_status(&spi_parameters);
-    }
-    else if (arguments.test_mode == TEST_TX_SIMPLE)
-    {
-        radio_transmit_test(&spi_parameters, &arguments);
-    }
-    else if (arguments.test_mode == TEST_TX_INTERRUPT)
-    {
-        radio_transmit_test_int(&spi_parameters, &arguments);
-    }
-    else if (arguments.test_mode == TEST_RX_SIMPLE)
-    {
-        radio_receive_test(&spi_parameters, &arguments);
-    }
-    else if (arguments.test_mode == TEST_RX_INTERRUPT)
-    {
-        radio_receive_test_int(&spi_parameters, &arguments);
-    }
-    else if (arguments.test_mode == TEST_TX_ECHO)
-    {
-        radio_test_echo(&spi_parameters, &radio_parameters, &arguments, 1);
-    }
-    else if (arguments.test_mode == TEST_RX_ECHO)
-    {
-        radio_test_echo(&spi_parameters, &radio_parameters, &arguments, 0);
-    }
-    else
-    {
-        kiss_init(&arguments);
-        kiss_run(&serial_parameters, &spi_parameters, &arguments);
-    }
+	if (arguments.print_radio_status) {
+		fprintf(stderr, "\n--- Radio state ---\n");
+		print_radio_status(&spi_parameters);
+	} else if (arguments.test_mode == TEST_TX_SIMPLE) {
+		radio_transmit_test(&spi_parameters, &arguments);
+	} else if (arguments.test_mode == TEST_TX_INTERRUPT) {
+		radio_transmit_test_int(&spi_parameters, &arguments);
+	} else if (arguments.test_mode == TEST_RX_SIMPLE) {
+		radio_receive_test(&spi_parameters, &arguments);
+	} else if (arguments.test_mode == TEST_RX_INTERRUPT) {
+		radio_receive_test_int(&spi_parameters, &arguments);
+	} else if (arguments.test_mode == TEST_TX_ECHO) {
+		radio_test_echo(&spi_parameters, &radio_parameters, &arguments, 1);
+	} else if (arguments.test_mode == TEST_RX_ECHO) {
+		radio_test_echo(&spi_parameters, &radio_parameters, &arguments, 0);
+	} else {
+		kiss_init(&arguments);
+		kiss_run(&serial_parameters, &spi_parameters, &arguments);
+	}
 
-    delete_args(&arguments);
-    return 0;
+	delete_args(&arguments);
+
+	return (0);
 }
